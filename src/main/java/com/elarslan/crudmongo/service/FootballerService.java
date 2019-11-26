@@ -2,22 +2,21 @@ package com.elarslan.crudmongo.service;
 
 
 import com.elarslan.crudmongo.model.Footballer;
-import com.elarslan.crudmongo.service.base.IService;
-import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
- * Created by ersin on 16.11.2019.
+ * Created by ersin on 26.11.2019.
  */
-@Service
-public interface FootballerService extends IService<Footballer, Long> {
+
+public interface FootballerService {
+    List<Footballer> findByName(String name);
 
     Footballer save(Footballer footballer);
 
-    Footballer findBySurname(String surname);
+    List<Footballer> findBySurname(String surname);
 
-    void deleteById(Long id);
+    List<Footballer> findAll();
 
-    Footballer findAllByOrderByWorthDesc();
-
-    Footballer findFootballerByMaxWorth();
+    Footballer findMostValuableFootballer();
 }

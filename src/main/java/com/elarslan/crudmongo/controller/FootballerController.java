@@ -2,12 +2,9 @@ package com.elarslan.crudmongo.controller;
 
 
 import com.elarslan.crudmongo.controller.base.GenericResponseDTO;
-import com.elarslan.crudmongo.controller.requestdto.FootballerRequestDTO;
 import com.elarslan.crudmongo.controller.responsedto.FootballerResponseDTO;
-import com.elarslan.crudmongo.exception.ResourceNotFoundException;
 import com.elarslan.crudmongo.model.Footballer;
 import com.elarslan.crudmongo.repository.IFootballerRepository;
-import com.elarslan.crudmongo.repository.base.IDataRepository;
 import com.elarslan.crudmongo.service.FootballerService;
 import com.elarslan.crudmongo.util.enums.MessageStatus;
 import com.elarslan.crudmongo.util.helper.MessageHelper;
@@ -21,8 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import java.util.Optional;
 
 /**
  * Created by ersin on 25.11.2019.
@@ -50,33 +45,43 @@ public class FootballerController {
 
     @PostMapping("/saveFootballer")
     public ResponseEntity saveFootballer(@Valid @RequestBody Footballer footballer) {
-
         log.debug("[FootballerController]: [Method] saveFootballer:\nSaved Footballer: " + footballer.toString());
-
-        footballerService.save(footballer);
         modelMapper.map(footballer, footballerResponseDTO);
 
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findAllByOrderByWorthDesc()));
+                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.save(footballer)));
     }
 
-   /* @GetMapping("/getAllFootballers")
+    @GetMapping("/getAllFootballers")
     public ResponseEntity getAllFootballers() {
-
         log.debug("[FootballerController]: [Method] getAllFootballers:Enter");
 
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findAll()));
     }
 
+    @GetMapping("/getMostValuableFootballer")
+    public ResponseEntity getMostValuableFootballer() {
+        log.debug("[FootballerController]: [Method] getMostValuableFootballer:Enter");
+
+        return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
+                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findMostValuableFootballer()));
+    }
+
     @GetMapping("/getDetailedFootballer/bySurname/{surname}")
     public ResponseEntity getDetailedFootballerBySurname(@PathVariable(value = "surname") @NotBlank String surname) {
-
         log.debug("[FootballerController]: [Method] getDetailedFootballerBySurname:\nName: " + surname);
 
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findBySurname(surname)));
     }
+
+    //footballerService.findByName("Oktay")
+
+
+   /*
+
+
 
     @GetMapping("/getFootballer/bySurname/{surname}")
     public ResponseEntity getFootballerBySurname(@PathVariable(value = "surname") @NotBlank String surname) {
