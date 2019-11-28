@@ -5,8 +5,14 @@ import com.elarslan.crudmongo.model.base.DataEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.IndexDirection;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -18,21 +24,25 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document("footballer")
+/*@CompoundIndexes({
+        @CompoundIndex(name = "composite_key", def = "{'name' : 1, 'surname': 1")
+})*/
 public class Footballer extends DataEntity {
 
-    @NotEmpty(message = "Name cannot be empty")
+    @NotBlank(message = "Name cannot be empty")
+    @Indexed(unique = true)
     private String name;
 
-    @NotEmpty(message = "Surname cannot be empty")
+    @NotBlank(message = "Surname cannot be empty")
     private String surname;
 
     @NotNull(message = "Date of birth cannot be empty")
     private LocalDate dateOfBirth;
 
-    @NotEmpty(message = "Date of place cannot be empty")
+    @NotBlank(message = "Date of place cannot be empty")
     private String dateofPlace;
 
-    @NotEmpty(message = "National cannot be empty")
+    @NotBlank(message = "National cannot be empty")
     private String national;
 
     @NotNull(message = "Worth cannot be empty")

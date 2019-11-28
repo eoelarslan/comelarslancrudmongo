@@ -4,7 +4,6 @@ package com.elarslan.crudmongo.controller;
 import com.elarslan.crudmongo.controller.base.GenericResponseDTO;
 import com.elarslan.crudmongo.controller.responsedto.FootballerResponseDTO;
 import com.elarslan.crudmongo.model.Footballer;
-import com.elarslan.crudmongo.repository.IFootballerRepository;
 import com.elarslan.crudmongo.service.FootballerService;
 import com.elarslan.crudmongo.util.enums.MessageStatus;
 import com.elarslan.crudmongo.util.helper.Constants;
@@ -13,13 +12,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -46,8 +45,8 @@ public class FootballerController {
     @Autowired
     private FootballerResponseDTO footballerResponseDTO;
 
-    @PostMapping("/saveFootballer")
-    public ResponseEntity saveFootballer(@Valid @RequestBody Footballer footballer) {
+    @PostMapping(value = "/saveFootballer", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity saveFootballer(@Valid @RequestBody Footballer footballer ) {
         log.debug("[FootballerController]: [Method] saveFootballer:\nSaved Footballer: " + footballer.toString());
 
         footballerService.save(footballer);
@@ -57,7 +56,7 @@ public class FootballerController {
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerResponseDTO ));
     }
 
-    @GetMapping("/getAllFootballers")
+    @GetMapping(value = "/getAllFootballers", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getAllFootballers() {
         log.debug("[FootballerController]: [Method] getAllFootballers:Enter");
 
@@ -65,7 +64,7 @@ public class FootballerController {
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findAll()));
     }
 
-    @GetMapping("/getMostValuableFootballer")
+    @GetMapping(value = "/getMostValuableFootballer", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getMostValuableFootballer() {
         log.debug("[FootballerController]: [Method] getMostValuableFootballer:Enter");
 
@@ -73,7 +72,7 @@ public class FootballerController {
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findMostValuableFootballer()));
     }
 
-    @GetMapping("/getDetailedFootballer/bySurname/{surname}")
+    @GetMapping(value = "/getDetailedFootballer/bySurname/{surname}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getDetailedFootballerBySurname(@PathVariable(value = "surname") @NotBlank String surname) {
         log.debug("[FootballerController]: [Method] getDetailedFootballerBySurname:\nName: " + surname);
 
@@ -81,7 +80,7 @@ public class FootballerController {
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.findBySurname(surname)));
     }
 
-    @GetMapping("/getFootballer/bySurname/{surname}")
+    @GetMapping(value = "/getFootballer/bySurname/{surname}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity getFootballerBySurname(@PathVariable(value = "surname") @NotBlank String surname) {
 
         log.debug("[FootballerController]: [Method] getFootballerBySurname:\nName: " + surname);
