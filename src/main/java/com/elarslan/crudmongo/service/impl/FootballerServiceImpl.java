@@ -48,4 +48,19 @@ public class FootballerServiceImpl implements FootballerService {
     public Footballer findMostValuableFootballer() {
         return footballerRepository.findFirstByOrderByWorthDesc();
     }
+
+    @Override
+    public Footballer findByNameAndSurname(String name, String surname) {
+        return footballerRepository.findByNameAndSurname(name, surname);
+    }
+
+    @Override
+    public Footballer updateFootballer(Footballer footballer) {
+        return footballerRepository.save(footballer);
+    }
+
+    @Override
+    public void deleteFootballerByNameAndSurname(String name, String surname) {
+        footballerRepository.deleteFootballerByNameAndSurname(name, surname);
+    }
 }

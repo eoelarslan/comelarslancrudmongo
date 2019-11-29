@@ -2,8 +2,11 @@ package com.elarslan.crudmongo.controller;
 
 
 import com.elarslan.crudmongo.controller.base.GenericResponseDTO;
+import com.elarslan.crudmongo.controller.requestdto.FootballerRequestDTO;
 import com.elarslan.crudmongo.controller.responsedto.FootballerResponseDTO;
+import com.elarslan.crudmongo.exception.ResourceNotFoundException;
 import com.elarslan.crudmongo.model.Footballer;
+import com.elarslan.crudmongo.repository.IFootballerRepository;
 import com.elarslan.crudmongo.service.FootballerService;
 import com.elarslan.crudmongo.util.enums.MessageStatus;
 import com.elarslan.crudmongo.util.helper.Constants;
@@ -11,6 +14,7 @@ import com.elarslan.crudmongo.util.helper.MessageHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by ersin on 25.11.2019.
@@ -45,6 +51,9 @@ public class FootballerController {
     @Autowired
     private FootballerResponseDTO footballerResponseDTO;
 
+    @Autowired
+    private IFootballerRepository footballerRepository;
+
     @PostMapping(value = "/saveFootballer", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity saveFootballer(@Valid @RequestBody Footballer footballer ) {
         log.debug("[FootballerController]: [Method] saveFootballer:\nSaved Footballer: " + footballer.toString());
@@ -53,7 +62,7 @@ public class FootballerController {
         modelMapper.map(footballer, footballerResponseDTO);
 
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerResponseDTO ));
+                messageHelper.getMessageByMessageStatus(MessageStatus.USER_CREATED, null), footballerResponseDTO ));
     }
 
     @GetMapping(value = "/getAllFootballers", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -110,63 +119,36 @@ public class FootballerController {
                 messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerList));
     }
 
-    //footballerService.findByName("Oktay")
-
-
-   /*
-
-
-
-
-
-    @GetMapping("/getDetailedFootballer/byId/{id}")
-    public ResponseEntity getDetailedFootballerById(@PathVariable(value = "id") @NotNull Long id) {
-
-        log.debug("[FootballerController]: [Method] getDetailedFootballerById:\nId: " + id);
-
-        return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.get(id)));
-    }
-
-    @GetMapping("/getFootballer/byId/{id}")
-    public ResponseEntity getFootballerById(@PathVariable(value = "id") @NotNull Long id) {
-
-        log.debug("[FootballerController]: [Method] getFootballerById:\nId: " + id);
-        Optional<Footballer> footballer = Optional.ofNullable(footballerService.get(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id)));
-
-        footballerResponseDTO.setName(footballer.isPresent() ? footballer.get().getName() : null);
-        footballerResponseDTO.setSurname(footballer.isPresent() ? footballer.get().getSurname() : null);
-
-        log.debug("[FootballerController]: [Method] footballerResponseDTO:" + footballerResponseDTO.toString());
-
-        return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerResponseDTO));
-    }
-
-    @PutMapping("/updateFootballer/{id}")
-    public ResponseEntity updateFootballer(@PathVariable(value = "id") @NotNull Long id,
+    @PutMapping("/updateFootballer/{name}/{surname}")
+    public ResponseEntity updateFootballer(@PathVariable(value = "name") @NotNull String name,
+                                           @PathVariable(value = "surname") @NotNull String surname,
                                            @Valid @RequestBody FootballerRequestDTO footballerRequestDTO) {
 
-        log.info("[FootballerController]: [Method] updateFootballer:\nId: " + id + "\nFootballerRequestDTO: " + footballerRequestDTO.toString());
-        Optional<Footballer> footballer = Optional.ofNullable(footballerService.get(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", id)));
+        log.info("[FootballerController]: [Method] updateFootballer:\nSurname: " + "surname" + "\nFootballerRequestDTO: " + footballerRequestDTO.toString());
 
-        // TODO rewrite as lambda function
-        if (footballer.isPresent()) {
-            log.debug("[FootballerController]: [Method] updateFootballer:\nFootballer - >" + footballer.get().toString());
-            footballer.get().setWorth(footballerRequestDTO.getWorth());
-        }
+        // Assume that name and surname are  unique together.
+        Footballer footballer = Optional.ofNullable(footballerService.findByNameAndSurname(name, surname))
+                .orElseThrow(() -> new ResourceNotFoundException("Footballer", "name", name));
+
+        footballer.setWorth(footballerRequestDTO.getWorth());
+
+        footballerService.updateFootballer(footballer);
+        modelMapper.map(footballer,footballerResponseDTO);
 
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), footballerService.save(footballer.get())));
+                messageHelper.getMessageByMessageStatus(MessageStatus.USER_UPDATED, null),
+                footballerResponseDTO));
     }
 
-    @DeleteMapping("/deleteFootballer/{id}")
-    public ResponseEntity deleteFootballer(@PathVariable(value = "id") @NotBlank Long id) {
+    @DeleteMapping("/deleteFootballer/{name}/{surname}")
+    public ResponseEntity deleteFootballer(@PathVariable(value = "name") @NotNull String name,
+                                           @PathVariable(value = "surname") @NotNull String surname) {
 
-        log.debug("[FootballerController]: [Method] deleteFootballer:\nId: " + id);
-        footballerService.deleteById(id);
+        log.debug("[FootballerController]: [Method] deleteFootballer:\nname: " + name
+                    + "\nsurname: " +surname);
+        footballerService.deleteFootballerByNameAndSurname(name, surname);
         return ResponseEntity.ok().body(new GenericResponseDTO<>(HttpStatus.ACCEPTED,
-                messageHelper.getMessageByMessageStatus(MessageStatus.DATA_RETRIEVED, null), null));
+                messageHelper.getMessageByMessageStatus(MessageStatus.DELETED, null), null));
 
-    }*/
+    }
 }

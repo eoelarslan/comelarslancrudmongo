@@ -19,4 +19,10 @@ public interface FootballerService {
     List<Footballer> findAll();
 
     Footballer findMostValuableFootballer();
+
+    Footballer findByNameAndSurname(String name, String surname);
+
+    Footballer updateFootballer(Footballer footballer);
+
+    void deleteFootballerByNameAndSurname(String name, String surname);
 }
