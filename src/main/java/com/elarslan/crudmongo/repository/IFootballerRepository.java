@@ -17,4 +17,8 @@ public interface IFootballerRepository extends MongoRepository<Footballer, Long>
     List<Footballer> findBySurname(String surname);
 
     Footballer findFirstByOrderByWorthDesc();
+
+    Footballer findByNameAndSurname(String name, String surname);
+
+    void deleteFootballerByNameAndSurname(String name, String surname);
 }

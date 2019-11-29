@@ -24,13 +24,10 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document("footballer")
-/*@CompoundIndexes({
-        @CompoundIndex(name = "composite_key", def = "{'name' : 1, 'surname': 1")
-})*/
+@CompoundIndex(def = "{'name':1, 'surname':-1}", name = "compound_index", unique = true)
 public class Footballer extends DataEntity {
 
     @NotBlank(message = "Name cannot be empty")
-    @Indexed(unique = true)
     private String name;
 
     @NotBlank(message = "Surname cannot be empty")
